@@ -2,6 +2,11 @@ package org.yli.web.rbm;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.javatuples.Pair;
+import org.javatuples.Tuple;
+import org.yli.web.rbm.services.Analyzer;
 import spark.ModelAndView;
 import spark.Spark;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -23,38 +28,17 @@ public class Main {
         Spark.threadPool(8, 2, 30000);
         Spark.staticFileLocation("/public");
 
-        Spark.get("/hello", (req, res) -> {
-            Map<String, Object> aMap = Maps.newHashMap();
-
-            Class.forName("org.mariadb.jdbc.Driver");
-            Connection conn =
-                    DriverManager.getConnection(
-                            "jdbc:mariadb://localhost:3306/reviewboard", "reviewboard", "reviewboard");
-
-            Statement statement = conn.createStatement();
-
-            ResultSet rs =
-                    statement.executeQuery("select count(a.id) the_count, b.username, b.first_name, b.last_name\n" +
-                        "from reviews_reviewrequest a, auth_user b\n" +
-                        "where a.submitter_id = b.id and DATE_SUB(curdate(), INTERVAL 60 DAY) <= a.time_added\n" +
-                        "group by b.username\n" +
-                        "  HAVING count(a.id) > 5\n" +
-                        "ORDER BY the_count desc");
-
-            List<String> names = Lists.newArrayList();
-            List<Integer> counts = Lists.newArrayList();
-
-            while (rs.next()) {
-                names.add(rs.getString(3) + " " + rs.getString(4));
-                counts.add(rs.getInt(1));
-            }
-
-            aMap.put("names", names);
-            aMap.put("counts", counts);
-
-
-            return new ModelAndView(aMap, "hello.ftl");
+        Spark.get("/dashboard", (req, res) -> {
+            return new ModelAndView(Maps.newHashMap(), "hello.ftl");
         }, new FreeMarkerEngine());
+
+        Spark.get("/last_month_people_post", (req, res) -> {
+            return Analyzer.getCommentCountGroupByPeople();
+        });
+
+        Spark.get("/review_request_per_month_last_half_year", (req, res) -> {
+            return Analyzer.getRequestStatisticOfLastSixMonth();
+        });
     }
 
 }
