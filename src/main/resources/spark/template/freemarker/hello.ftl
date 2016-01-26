@@ -31,32 +31,18 @@
                     {{item.name}}
                 </md-button>
             </md-list-item>
-
-            <#--<!-- List item #2 &ndash;&gt;-->
-            <#--<md-list-item >-->
-                <#--<md-button>-->
-                    <#--&lt;#&ndash;<md-icon md-svg-src="./assets/svg/avatar-4.svg" class="avatar"></md-icon>&ndash;&gt;-->
-                    <#--<img src="./assets/img/People-icon.png" class="avatar"></img>-->
-                    <#--People-->
-                <#--</md-button>-->
-            <#--</md-list-item>-->
-
         </md-list>
     </md-sidenav>
 
     <!-- Container #4 -->
     <md-content flex id="content">
-        <h2>Review Request sent in last 30 days</h2>
-        <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
-        <svg id="spinner1" class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-            <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
-        </svg>
-
-        <h2>Per Month New Added Review Requests (in last half year)</h2>
-        <div id="per_month_review_requests"><!-- Plotly chart will be drawn inside this DIV --></div>
-        <svg id="spinner2" class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-            <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
-        </svg>
+        <div ng-repeat="diagram in rbm.selected.diagrams">
+            <h2>{{diagram.title}}</h2>
+            <div id="plot_{{diagram.remote_service}}"></div>
+            <svg id="spinner_{{diagram.remote_service}}" class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+            </svg>
+        </div>
     </md-content>
 
 </div>
@@ -67,63 +53,12 @@
 <script src="./bower_components/angular-material/angular-material.js" type="text/javascript" ></script>
 <script src="./bower_components/jquery/dist/jquery.js" type="text/javascript" ></script>
 
-<script src="./js/rb_monitors.js" type="text/javascript" ></script>
-<script src="./js/rb_monitor_service.js" type="text/javascript" ></script>
-<script src="./js/rb_monitor_controller.js" type="text/javascript" ></script>
+<script src="./js/rb_monitors.js"></script>
+<script src="./js/rb_monitor_service.js"></script>
+<script src="./js/rb_monitor_controller.js"></script>
 
 <script>
-    // Include the dependency upon ngMaterial - important !!
-    var app = angular.module('starterApp', ['ngMaterial', 'rb_monitors']);
-//    app.controller('data', function($scope, $http) {
-//        $http.get("/last_month_people_post").then(function(response) {
-//            var data_x = [];
-//            var data_y = [];
-//
-//            angular.forEach(response.data, function(value) {
-//                this.push(value.val0);
-//            }, data_x);
-//
-//            angular.forEach(response.data, function(value) {
-//                this.push(value.val1);
-//            }, data_y);
-//
-//            var data = [{
-//                x: data_x,
-//                y: data_y,
-//                type: 'bar'
-//            }];
-//
-//            Plotly.newPlot('myDiv', data);
-//
-//            $("#spinner1").hide();
-//        });
-//
-//        $http.get("/review_request_per_month_last_half_year").then(function(response) {
-//            var data_x = [];
-//            var data_y = [];
-//
-//            angular.forEach(response.data, function(value) {
-//                this.push(value.val0);
-//            }, data_x);
-//
-//            angular.forEach(response.data, function(value) {
-//                this.push(value.val1);
-//            }, data_y);
-//
-//            var data = [{
-//                x: data_x,
-//                y: data_y,
-//                type: 'bar'
-//            }];
-//
-//            Plotly.newPlot('per_month_review_requests', data);
-//            $("#spinner2").hide();
-//        });
-    });
-
-//    angular.run(function($log) {
-//        $log.debug("starterApp + ngMaterial running...");
-//    });
+    angular.module('starterApp', ['ngMaterial', 'rb_monitors']);
 </script>
 
 

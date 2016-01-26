@@ -18,7 +18,8 @@ public class RbDb {
 
     static {
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
+            // Class.forName("org.mariadb.jdbc.Driver");
+            Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             LOGGER.error("Couldn't find the mariadb JDBC driver", e);
         }
@@ -37,8 +38,10 @@ public class RbDb {
     public static synchronized Connection getConnection() throws SQLException {
         if (dbConn == null) {
             dbConn =
+//                    DriverManager.getConnection(
+//                            "jdbc:mariadb://localhost:3306/reviewboard", "reviewboard", "reviewboard");
                     DriverManager.getConnection(
-                            "jdbc:mariadb://localhost:3306/reviewboard", "reviewboard", "reviewboard");
+                            "jdbc:mysql://localhost:3306/reviewboard", "reviewboard", "reviewboard");
         }
         return dbConn;
     }
