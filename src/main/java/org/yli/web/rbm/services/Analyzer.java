@@ -24,7 +24,7 @@ public class Analyzer {
     // do nothing
   }
 
-  public static String getCommentCountGroupByPeople() throws SQLException {
+  public static String getTop30ReviewRequestCountGroupByPeople() throws SQLException {
     List<Pair<String, Integer>> aList = Lists.newArrayList();
 
     Connection conn = RbDb.getConnection();
@@ -37,11 +37,11 @@ public class Analyzer {
       rs =
           statement.executeQuery("select count(a.id) the_count, b.username, b.first_name, b.last_name " +
               "from reviews_reviewrequest a, auth_user b " +
-              "where a.submitter_id = b.id and MONTH(DATE_SUB(curdate(), INTERVAL 60 DAY)) <= MONTH(a.time_added)" +
-              " AND  YEAR(DATE_SUB(curdate(), INTERVAL 60 DAY)) <= YEAR(a.time_added) " +
-              "group by b.username" +
-              "  HAVING count(a.id) > 5 " +
-              "ORDER BY the_count desc");
+              "where a.submitter_id = b.id and MONTH(DATE_SUB(curdate(), INTERVAL 30 DAY)) <= MONTH(a.time_added)" +
+              " AND  YEAR(DATE_SUB(curdate(), INTERVAL 30 DAY)) <= YEAR(a.time_added) " +
+              "group by b.username " +
+              "ORDER BY the_count desc " +
+              "LIMIT 30");
 
 
       while (rs.next()) {
@@ -74,7 +74,7 @@ public class Analyzer {
           statement.executeQuery("select count(*) the_count, CONCAT(year(time_added), '/', month(time_added)) month " +
               "from reviews_reviewrequest " +
               "where MONTH(date_sub(CURDATE(), INTERVAL 180 day)) <= MONTH(time_added) AND " +
-              " YEAR(data_sub(CURDATE(), INTERVAL 180 day)) <= YEAR(time_added) " +
+              " YEAR(date_sub(CURDATE(), INTERVAL 180 day)) <= YEAR(time_added) " +
               "GROUP BY month(time_added) " +
               "ORDER BY time_added");
 
@@ -111,8 +111,8 @@ public class Analyzer {
       statement = conn.createStatement();
 
       rs = statement.executeQuery("SELECT summary FROM reviews_reviewrequest " +
-          "WHERE MONTH(DATE_SUB(CURDATE(), INTERVAL 180 DAY)) <= MONTH(time_added) AND " +
-          "  YEAR(DATE_SUB(CURDATE(), INTERVAL 180 DAY)) <= YEAR(time_added) " +
+          "WHERE MONTH(DATE_SUB(CURDATE(), INTERVAL 30 DAY)) <= MONTH(time_added) AND " +
+          "  YEAR(DATE_SUB(CURDATE(), INTERVAL 30 DAY)) <= YEAR(time_added) " +
           "ORDER BY time_added");
 
       String summary = null;
@@ -174,6 +174,41 @@ public class Analyzer {
 
       while (rs.next()) {
         aList.add(new Pair<>(rs.getString(1), rs.getInt(2)));
+      }
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+
+      if (statement != null) {
+        statement.close();
+      }
+    }
+
+    return new GsonBuilder().create().toJson(aList);
+  }
+
+  public static String getTop30ReviewerInLastMonth() throws SQLException {
+    List<Pair<String, Integer>> aList = Lists.newArrayList();
+
+    Connection conn = RbDb.getConnection();
+
+    Statement statement = null;
+    ResultSet rs = null;
+    try {
+      statement = conn.createStatement();
+
+      rs = statement.executeQuery("select count(*) total_count, CONCAT(u.first_name, ' ', u.last_name) user_name\n" +
+          "from reviews_review a, reviews_comment b, reviews_review_comments c, reviews_reviewrequest d, auth_user u\n" +
+          "WHERE a.id = c.review_id and b.id = c.comment_id and d.id = a.review_request_id and a.user_id = u.id\n" +
+          "  and MONTH(date_sub(CURDATE(), INTERVAL 30 day)) <= MONTH(d.time_added)\n" +
+          "  and YEAR(date_sub(CURDATE(), INTERVAL 30 day)) <= YEAR(d.time_added)\n" +
+          "GROUP BY user_name\n" +
+          "ORDER BY total_count DESC\n");
+
+
+      while (rs.next()) {
+        aList.add(new Pair<>(rs.getString(2), rs.getInt(1)));
       }
     } finally {
       if (rs != null) {

@@ -21,7 +21,7 @@ public class Main {
         }, new FreeMarkerEngine());
 
         Spark.get("/last_month_people_post", (req, res) -> {
-            return Analyzer.getCommentCountGroupByPeople();
+            return Analyzer.getTop30ReviewRequestCountGroupByPeople();
         });
 
         Spark.get("/review_request_per_month_last_half_year", (req, res) -> {
@@ -34,6 +34,10 @@ public class Main {
 
         Spark.get("/get_requests_groupd_by_product_in_last_30_days", (req, res) -> {
             return Analyzer.getRequestsGroupByProductSentInLastMonth();
+        });
+
+        Spark.get("/get_top_30_reviewer_in_last_30_days", (req, res) -> {
+            return Analyzer.getTop30ReviewerInLastMonth();
         });
     }
 

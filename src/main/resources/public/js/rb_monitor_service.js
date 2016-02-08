@@ -28,8 +28,12 @@
                 icon: 'People-icon.png',
                 diagrams: [
                     {
-                        title: 'In last month, who posted requests more than 5',
+                        title: 'Top 30 reviewees in last month (who posts review request the most)',
                         remote_service: 'last_month_people_post'
+                    },
+                    {
+                        title: 'Top 30 reviewers in last month (who comments the most)',
+                        remote_service: 'get_top_30_reviewer_in_last_30_days'
                     },
                     {
                         title: 'New added users per month in last year',
