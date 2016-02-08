@@ -1,22 +1,10 @@
 package org.yli.web.rbm;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.javatuples.Pair;
-import org.javatuples.Tuple;
 import org.yli.web.rbm.services.Analyzer;
 import spark.ModelAndView;
 import spark.Spark;
 import spark.template.freemarker.FreeMarkerEngine;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by yli on 1/23/16.
@@ -38,6 +26,14 @@ public class Main {
 
         Spark.get("/review_request_per_month_last_half_year", (req, res) -> {
             return Analyzer.getRequestStatisticOfLastSixMonth();
+        });
+
+        Spark.get("/new_added_user_per_month_in_last_year", (req, res) -> {
+            return Analyzer.getNewAddedUsersPerMonthInLastYear();
+        });
+
+        Spark.get("/get_requests_groupd_by_product_in_last_30_days", (req, res) -> {
+            return Analyzer.getRequestsGroupByProductSentInLastMonth();
         });
     }
 

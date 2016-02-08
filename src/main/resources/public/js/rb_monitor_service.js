@@ -16,6 +16,10 @@
                     {
                         title: 'Request posted in last 180 days',
                         remote_service: 'review_request_per_month_last_half_year'
+                    },
+                    {
+                        title: 'Requests grouped by product in last 30 days',
+                        remote_service: 'get_requests_groupd_by_product_in_last_30_days'
                     }
                 ]
             },
@@ -24,8 +28,12 @@
                 icon: 'People-icon.png',
                 diagrams: [
                     {
-                        title: 'People posted request in last 30 days',
+                        title: 'In last month, who posted requests more than 5',
                         remote_service: 'last_month_people_post'
+                    },
+                    {
+                        title: 'New added users per month in last year',
+                        remote_service: 'new_added_user_per_month_in_last_year'
                     }
                 ]
             }
