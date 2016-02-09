@@ -1,5 +1,6 @@
 package org.yli.web.rbm.db;
 
+import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,11 +38,20 @@ public class RbDb {
      */
     public static synchronized Connection getConnection() throws SQLException {
         if (dbConn == null) {
+            String host = System.getProperty("db_host");
+            String port = System.getProperty("db_port");
+
+            if (Strings.isNullOrEmpty(host)) {
+                host = "localhost";
+            }
+
+            if (Strings.isNullOrEmpty(port)) {
+                port = "3306";
+            }
+
             dbConn =
-//                    DriverManager.getConnection(
-//                            "jdbc:mariadb://localhost:3306/reviewboard", "reviewboard", "reviewboard");
                     DriverManager.getConnection(
-                            "jdbc:mysql://localhost:3306/reviewboard", "reviewboard", "reviewboard");
+                            String.format("jdbc:mysql://%s:%d/reviewboard", host, port), "reviewboard", "reviewboard");
         }
         return dbConn;
     }
