@@ -4,7 +4,7 @@
     <groupId>org.yli.web</groupId>
     <artifactId>rbm</artifactId>
     <packaging>war</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>Review Board Monitor</name>
 
     <dependencies>
