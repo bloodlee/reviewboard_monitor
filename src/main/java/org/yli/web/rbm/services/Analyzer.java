@@ -16,15 +16,16 @@ import java.util.Map;
 /**
  * Created by yli on 1/23/16.
  */
-public class Analyzer {
+public class Analyzer implements IAnalyzer {
 
   public static final String UNKNOWN = "unknown";
 
-  private Analyzer() {
+  public Analyzer() {
     // do nothing
   }
 
-  public static String getTop30ReviewRequestCountGroupByPeople() throws SQLException {
+  @Override
+  public String getTop30ReviewRequestCountGroupByPeople() throws SQLException {
     List<Pair<String, Integer>> aList = Lists.newArrayList();
 
     Connection conn = RbDb.getConnection();
@@ -55,12 +56,17 @@ public class Analyzer {
       if (statement != null) {
         statement.close();
       }
+
+      if (conn != null) {
+        conn.close();
+      }
     }
 
     return new GsonBuilder().create().toJson(aList);
   }
 
-  public static String getRequestStatisticOfLastSixMonth() throws SQLException {
+  @Override
+  public String getRequestStatisticOfLastSixMonth() throws SQLException {
     List<Pair<String, Integer>> aList = Lists.newArrayList();
 
     Connection conn = RbDb.getConnection();
@@ -73,8 +79,7 @@ public class Analyzer {
       rs =
           statement.executeQuery("select count(*) the_count, CONCAT(year(time_added), '/', month(time_added)) month " +
               "from reviews_reviewrequest " +
-              "where MONTH(date_sub(CURDATE(), INTERVAL 180 day)) <= MONTH(time_added) AND " +
-              " YEAR(date_sub(CURDATE(), INTERVAL 180 day)) <= YEAR(time_added) " +
+              "where date_sub(CURDATE(), INTERVAL 180 day) <= time_added " +
               "GROUP BY month(time_added) " +
               "ORDER BY time_added");
 
@@ -89,15 +94,20 @@ public class Analyzer {
       if (statement != null) {
         statement.close();
       }
+
+      if (conn != null) {
+        conn.close();
+      }
     }
 
     return new GsonBuilder().create().toJson(aList);
   }
 
-  public static String getRequestsGroupByProductSentInLastMonth() throws SQLException {
+  @Override
+  public String getRequestsGroupByProductSentInLastMonth() throws SQLException {
     Map<String, Integer> aMap = Maps.newLinkedHashMap();
 
-    final List<String> patterns = Lists.newArrayList("PLT", "SMO", "MOD", "TBX", "LMC", "DOM");
+    final List<String> patterns = Lists.newArrayList("PLT", "SMO", "MOD", "TBX", "LMC", "DOM", "OPC", "PWO");
     for (String aPattern : patterns) {
       aMap.put(aPattern, 0);
     }
@@ -111,8 +121,7 @@ public class Analyzer {
       statement = conn.createStatement();
 
       rs = statement.executeQuery("SELECT summary FROM reviews_reviewrequest " +
-          "WHERE MONTH(DATE_SUB(CURDATE(), INTERVAL 30 DAY)) <= MONTH(time_added) AND " +
-          "  YEAR(DATE_SUB(CURDATE(), INTERVAL 30 DAY)) <= YEAR(time_added) " +
+          "WHERE DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= time_added " +
           "ORDER BY time_added");
 
       String summary = null;
@@ -142,6 +151,10 @@ public class Analyzer {
       if (statement != null) {
         statement.close();
       }
+
+      if (conn != null) {
+        conn.close();
+      }
     }
 
     List<Pair<String, Integer>> aList = Lists.newArrayList();
@@ -153,7 +166,8 @@ public class Analyzer {
     return new GsonBuilder().create().toJson(aList);
   }
 
-  public static String getNewAddedUsersPerMonthInLastYear() throws SQLException {
+  @Override
+  public String getNewAddedUsersPerMonthInLastYear() throws SQLException {
     List<Pair<String, Integer>> aList = Lists.newArrayList();
 
     Connection conn = RbDb.getConnection();
@@ -183,12 +197,17 @@ public class Analyzer {
       if (statement != null) {
         statement.close();
       }
+
+      if (conn != null) {
+        conn.close();
+      }
     }
 
     return new GsonBuilder().create().toJson(aList);
   }
 
-  public static String getTop30ReviewerInLastMonth() throws SQLException {
+  @Override
+  public String getTop30ReviewerInLastMonth() throws SQLException {
     List<Pair<String, Integer>> aList = Lists.newArrayList();
 
     Connection conn = RbDb.getConnection();
@@ -217,6 +236,10 @@ public class Analyzer {
 
       if (statement != null) {
         statement.close();
+      }
+
+      if (conn != null) {
+        conn.close();
       }
     }
 

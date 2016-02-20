@@ -7,6 +7,7 @@
 
     <script type="text/javascript" src="./bower_components/plotlyjs/plotly.js"></script>
     <link href="./bower_components/angular-material/angular-material.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="./assets/img/rb_32x32.png" media="screen"/>
     <link rel="stylesheet" href="assets/app.css"/>
 </head>
 
@@ -14,7 +15,18 @@
 
 <!-- Container #1 (see wireframe) -->
 <md-toolbar layout="row" >
-    <h3>Review Board Monitor</h3>
+    <div>
+        <table style="width:auto">
+            <tr>
+                <td>
+                    <img src="./assets/img/rb_32x32.png" align="middle"/>
+                </td>
+                <td>
+                    <h3>Review Board Monitor</h3>
+                </td>
+            </tr>
+        </table>
+    </div>
 </md-toolbar>
 
 <!-- Container #2 -->
