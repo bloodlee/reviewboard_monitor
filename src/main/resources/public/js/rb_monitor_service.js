@@ -12,6 +12,7 @@
             {
                 name: 'Review Requests',
                 icon: 'trends-icon.png',
+                type: 'chart',
                 diagrams: [
                     {
                         title: 'Request posted in last 180 days',
@@ -26,6 +27,7 @@
             {
                 name: 'People',
                 icon: 'People-icon.png',
+                type: 'chart',
                 diagrams: [
                     {
                         title: 'Top 30 reviewees in last month (who posts review request the most)',
@@ -40,6 +42,22 @@
                         remote_service: 'new_added_user_per_month_in_last_year'
                     }
                 ]
+            },
+            {
+                name: 'Perforce',
+                icon: 'p4.gif',
+                type: 'perforce',
+                service: {
+                    key: ''
+                }
+            },
+            {
+                name: 'Utilities',
+                icon: 'Settings-icon.png',
+                type: 'utilities',
+                p4: {
+                    initialized: false
+                }
             }
         ];
 

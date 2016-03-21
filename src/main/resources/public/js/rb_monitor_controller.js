@@ -7,15 +7,32 @@
 
     angular.module('rb_monitors')
         .controller('rb_monitor_controller', [
-            'rbMonitorService', '$http', RbMonitorController
+            'rbMonitorService', '$http', '$scope', RbMonitorController
         ]);
 
-    function RbMonitorController(rbMonitorService, $http) {
+    function RbMonitorController(rbMonitorService, $http, $scope) {
         var self = this;
 
         self.selected = null;
         self.monitorItems = [];
         self.selectMonitorItem = selectItem;
+
+        self.selected_cl = []
+        self.query = {
+            order: 'reviewedClCount',
+            limit: 200,
+            page: 1
+        };
+
+        function getPerforceData(query) {
+            $scope.promise = $http.get("/get_perforce_data").then(function (response) {
+               $scope.cl_datas = response;
+            });
+        }
+
+        $scope.onReorder = function (order) {
+            getPerforceData(angular.extend({}, self.query, {order: order}));
+        };
 
         rbMonitorService
             .loadAllMonitorItems()
@@ -23,6 +40,8 @@
                 self.monitorItems = [].concat(items);
 
                 selectItem(items[0]);
+
+                getPerforceData(self.query);
             });
 
         function selectItem(item) {

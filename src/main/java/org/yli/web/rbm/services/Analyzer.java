@@ -6,10 +6,8 @@ import com.google.gson.GsonBuilder;
 import org.javatuples.Pair;
 import org.yli.web.rbm.db.RbDb;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +41,6 @@ public class Analyzer implements IAnalyzer {
               "group by b.username " +
               "ORDER BY the_count desc " +
               "LIMIT 30");
-
 
       while (rs.next()) {
         aList.add(new Pair<>(rs.getString(3) + " " + rs.getString(4), rs.getInt(1)));
@@ -244,5 +241,67 @@ public class Analyzer implements IAnalyzer {
     }
 
     return new GsonBuilder().create().toJson(aList);
+  }
+
+  @Override
+  public String getP4Statistic(Date fromDate) throws SQLException {
+    List<PerforceStatisticData> datas = Lists.newArrayList();
+
+    Connection conn = RbDb.getConnection();
+
+    PreparedStatement statement = null;
+    ResultSet rs = null;
+    try {
+      statement = conn.prepareStatement("" +
+          "select a.first_name, a.last_name, a.username, a.ticket_count reviewed_changelists, b.ticket_count all_changelists, a.ticket_count / b.ticket_count ratio from\n" +
+          "  (\n" +
+          "    select count(a.id) ticket_count, a.username, b.first_name, b.last_name\n" +
+          "    from p4_cl a\n" +
+          "      left join auth_user b on a.username = b.username\n" +
+          "    where date > ?\n" +
+          "          and a.pending_cl_id in (select changenum from reviews_reviewrequest)\n" +
+          "    group by a.username\n" +
+          "    order by ticket_count desc\n" +
+          "  ) a,\n" +
+          "  (\n" +
+          "    select count(a.id) ticket_count, a.username, b.first_name, b.last_name\n" +
+          "    from p4_cl a\n" +
+          "      left join auth_user b on a.username = b.username\n" +
+          "    where date > ?\n" +
+          "    group by a.username order by ticket_count desc\n" +
+          "  ) b\n" +
+          "where a.username = b.username\n" +
+          "order by reviewed_changelists desc");
+
+      statement.setDate(1, new java.sql.Date(fromDate.getTime()));
+      statement.setDate(2, new java.sql.Date(fromDate.getTime()));
+
+      rs = statement.executeQuery();
+
+      while (rs.next()) {
+        String firstName = rs.getString(1);
+        String lastName = rs.getString(2);
+        String p4Account = rs.getString(3);
+        int reviewClCount = rs.getInt(4);
+        int allClCount = rs.getInt(5);
+        double reviewRatio = rs.getDouble(6) * 100.0;
+        datas.add(new PerforceStatisticData(firstName, lastName, p4Account, reviewClCount, allClCount, reviewRatio));
+      }
+
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+
+      if (statement != null) {
+        statement.close();
+      }
+
+      if (conn != null) {
+        conn.close();
+      }
+    }
+
+    return new GsonBuilder().create().toJson(datas);
   }
 }
