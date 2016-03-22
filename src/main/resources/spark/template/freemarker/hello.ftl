@@ -66,6 +66,7 @@
             <md-toolbar class="md-table-toolbar md-default">
                 <div class="md-toolbar-tools">
                     <h2>Reviewed Perforce Changelist (last month)</h2>
+                    <span>Latest changelist in database is {{rbm.latestClId}}</span>
                 </div>
             </md-toolbar>
 

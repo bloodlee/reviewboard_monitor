@@ -19,4 +19,6 @@ public interface IAnalyzer {
   String getTop30ReviewerInLastMonth() throws SQLException;
 
   String getP4Statistic(Date fromDate) throws SQLException;
+
+  String getLatestClId() throws SQLException;
 }

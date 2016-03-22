@@ -88,8 +88,10 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
 
         val diffCount = lastClIdInP4 - latestClIdInDb
 
-        insertNewRecords(diffCount)
-        updateClInformation(latestClIdInDb, lastClIdInP4)
+        if (diffCount > 0) {
+            insertNewRecords(diffCount)
+            updateClInformation(latestClIdInDb, lastClIdInP4)
+        }
     }
 
     private fun updateClInformation(latestClId: Int, lastClId: Int) {

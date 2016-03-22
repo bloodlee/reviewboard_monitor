@@ -2,16 +2,14 @@ package org.yli.web.rbm;
 
 import com.google.common.collect.Maps;
 import org.joda.time.DateTime;
-import org.yli.web.rbm.memcached.MemcachedUtil;
+import org.yli.web.rbm.perforce.P4ClUtil;
 import org.yli.web.rbm.proxy.CachedAnalyzerProxy;
 import org.yli.web.rbm.services.Analyzer;
 import org.yli.web.rbm.services.IAnalyzer;
+import org.yli.web.rbm.services.UpdatePerforceRunnable;
 import spark.ModelAndView;
 import spark.Spark;
 import spark.template.freemarker.FreeMarkerEngine;
-
-import java.text.DateFormat;
-import java.util.Date;
 
 /**
  * Created by yli on 1/23/16.
@@ -31,6 +29,9 @@ public class Main {
         }
 
         final IAnalyzer proxy = proxyTmp;
+
+        final UpdatePerforceRunnable updateRunnable = new UpdatePerforceRunnable();
+        Thread updateThread = new Thread(updateRunnable);
 
         Spark.get("/dashboard", (req, res) -> {
             return new ModelAndView(Maps.newHashMap(), "hello.ftl");
@@ -60,6 +61,11 @@ public class Main {
             return proxy.getP4Statistic(DateTime.now().minusMonths(1).toDate());
         });
 
+        Spark.get("/get_max_cl_id", (req, res) -> {
+            return proxy.getLatestClId();
+        });
+
+        updateThread.start();
     }
 
 }

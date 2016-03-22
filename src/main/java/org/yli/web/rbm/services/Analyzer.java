@@ -2,6 +2,7 @@ package org.yli.web.rbm.services;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
 import org.javatuples.Pair;
 import org.yli.web.rbm.db.RbDb;
@@ -303,5 +304,40 @@ public class Analyzer implements IAnalyzer {
     }
 
     return new GsonBuilder().create().toJson(datas);
+  }
+
+  @Override
+  public String getLatestClId() throws SQLException {
+    Map<String, Integer> data = Maps.newHashMap();
+
+    Connection conn = RbDb.getConnection();
+
+    Statement statement = null;
+    ResultSet rs = null;
+    try {
+      statement = conn.createStatement();
+
+      rs = statement.executeQuery("SELECT max(id) FROM p4_cl");
+
+      if (rs.next()) {
+        data.put("latest_id", rs.getInt(1));
+      }
+
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+
+      if (statement != null) {
+        statement.close();
+      }
+
+      if (conn != null) {
+        conn.close();
+      }
+    }
+
+    return new GsonBuilder().create().toJson(data, new TypeToken<Map<String,
+            Object>>() {}.getType());
   }
 }

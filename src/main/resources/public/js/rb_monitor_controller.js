@@ -24,10 +24,18 @@
             page: 1
         };
 
+        self.latestClId = -1;
+
         function getPerforceData(query) {
             $scope.promise = $http.get("/get_perforce_data").then(function (response) {
                $scope.cl_datas = response;
             });
+        }
+
+        function refreshLatestClId() {
+            $http.get("/get_max_cl_id").then(function (response) {
+                self.latestClId = response.data.latest_id;
+            })
         }
 
         $scope.onReorder = function (order) {
@@ -41,6 +49,7 @@
 
                 selectItem(items[0]);
 
+                refreshLatestClId();
                 getPerforceData(self.query);
             });
 
