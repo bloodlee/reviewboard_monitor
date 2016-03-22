@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.jetbrains.kotlin:kotlin-jdbc:0.14.451">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-jdbc/0.14.451/kotlin-jdbc-0.14.451.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-jdbc/0.14.451/kotlin-jdbc-0.14.451-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-jdbc/0.14.451/kotlin-jdbc-0.14.451-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
