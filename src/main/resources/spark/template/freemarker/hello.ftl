@@ -49,7 +49,7 @@
 
     <!-- Container #4 -->
     <md-content flex id="content">
-        <div ng-show="rbm.selected.type == 'chart'">
+        <div ng-if="rbm.selected.type == 'chart'">
             <div ng-repeat="diagram in rbm.selected.diagrams">
                 <h2>{{diagram.title}}</h2>
 
@@ -62,11 +62,10 @@
                 </div>
             </div>
         </div>
-        <div ng-show="rbm.selected.type == 'perforce'">
+        <div ng-if="rbm.selected.type == 'perforce'">
             <md-toolbar class="md-table-toolbar md-default">
                 <div class="md-toolbar-tools">
                     <h2>Reviewed Perforce Changelist (last month)</h2>
-                    <span>Latest changelist in database is {{rbm.latestClId}}</span>
                 </div>
             </md-toolbar>
 
@@ -80,12 +79,12 @@
                 <table md-table md-progress="promise">
                     <thead md-head md-order="rbm.query.order" md-on-reorder="rbm.onReorder">
                     <tr md-row>
-                        <th md-column md-order-by="firstNameToLower"><span>First Name</span></th>
-                        <th md-column md-order-by="lastNameToLower"><span>Last Name</span></th>
-                        <th md-column md-order-by="p4AccountToLower"><span>P4 Account</span></th>
-                        <th md-column md-numeric>Reviewed P4 CL Count</th>
-                        <th md-column md-numeric>All P4 CL Count</th>
-                        <th md-column md-numeric>Reviewed Ratio (%)</th>
+                        <th md-column md-order-by="firstName"><span>First Name</span></th>
+                        <th md-column md-order-by="lastName"><span>Last Name</span></th>
+                        <th md-column md-order-by="p4Account"><span>P4 Account</span></th>
+                        <th md-column md-numeric md-order-by="reviewedClCount">Reviewed P4 CL Count</th>
+                        <th md-column md-numeric md-order-by="allClCount">All P4 CL Count</th>
+                        <th md-column md-numeric md-order-by="ratio">Reviewed Ratio (%)</th>
                     </tr>
                     </thead>
                     <tbody md-body>
@@ -95,25 +94,26 @@
                         <td md-cell>{{cl_data.p4Account}}</td>
                         <td md-cell>{{cl_data.reviewedClCount}}</td>
                         <td md-cell>{{cl_data.allClCount}}</td>
-                        <td md-cell>{{cl_data.ratio}}</td>
+                        <td md-cell>{{cl_data.ratio | number: 2}}</td>
                     </tr>
                     </tbody>
                 </table>
             </md-table-container>
         </div>
-        <#--<div ng-if="rbm.selected.type == 'utilities'">-->
-            <#--<md-toolbar>-->
-                <#--<div class="md-toolbar-tools">-->
-                    <#--<h2>-->
-                        <#--<span>Perforce</span>-->
-                    <#--</h2>-->
-                <#--</div>-->
-            <#--</md-toolbar>-->
-            <#--<md-content flex>-->
-                <#--<md-button class="md-raised md-primary" ng-disabled="rmb.selected.p4.initialized"-->
-                           <#--ng-click="rbm.initialize_perforce(rbm.selected)">Initialize</md-button>-->
-            <#--</md-content>-->
-        <#--</div>-->
+        <div ng-if="rbm.selected.type == 'utilities'">
+            <md-toolbar>
+                <div class="md-toolbar-tools">
+                    <h2>
+                        <span>Perforce (Latest changelist in database is {{rbm.latestClId}})</span>
+                    </h2>
+                </div>
+            </md-toolbar>
+            <md-content flex>
+                <span>{{rbm.p4_updator_status}}</span>
+                <md-button class="md-raised md-primary" ng-disabled="rbm.p4_is_updating"
+                           ng-click="rbm.startP4UpdateingImmediately()">Update Now!</md-button>
+            </md-content>
+        </div>
     </md-content>
 
 </div>

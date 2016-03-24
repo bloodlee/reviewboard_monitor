@@ -13,6 +13,8 @@ public class UpdatePerforceRunnable implements Runnable {
 
     private P4ClUtil util = new P4ClUtil(System.getProperty("p4username"), System.getProperty("p4passwd"));
 
+    // private P4ClUtil util = new P4ClUtil("yli", "iloveyou");
+
     private boolean updating = false;
 
     @Override
@@ -27,8 +29,7 @@ public class UpdatePerforceRunnable implements Runnable {
                 // wait for another hour to start another round of updating.
                 Thread.sleep(60 * 60 * 1000);
             } catch (InterruptedException e) {
-                LOGGER.debug("Thread is interrupted. Stopping running.");
-                break;
+                LOGGER.debug("Thread is interrupted. Stopping sleeping.");
             }
         }
 
@@ -36,5 +37,9 @@ public class UpdatePerforceRunnable implements Runnable {
 
     public boolean isUpdating() {
         return updating;
+    }
+
+    public String getUpdatorStatu() {
+        return util.getStatus();
     }
 }

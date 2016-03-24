@@ -46,18 +46,12 @@
             {
                 name: 'Perforce',
                 icon: 'p4.gif',
-                type: 'perforce',
-                service: {
-                    key: ''
-                }
+                type: 'perforce'
             },
             {
                 name: 'Utilities',
                 icon: 'Settings-icon.png',
-                type: 'utilities',
-                p4: {
-                    initialized: false
-                }
+                type: 'utilities'
             }
         ];
 

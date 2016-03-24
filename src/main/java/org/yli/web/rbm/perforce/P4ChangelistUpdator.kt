@@ -6,10 +6,9 @@ import com.perforce.p4java.exception.P4JavaException
 import com.perforce.p4java.option.server.ChangelistOptions
 import com.perforce.p4java.server.IOptionsServer
 import com.perforce.p4java.server.ServerFactory
+import org.apache.logging.log4j.LogManager
 import org.yli.web.rbm.db.RbDb
-import java.sql.Connection
-import java.sql.PreparedStatement
-import java.sql.Statement
+import java.sql.*
 import java.util.*
 
 /**
@@ -17,11 +16,21 @@ import java.util.*
  */
 class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
 
-    private val P4_SERVER = "perforce-brion.asml.com:1666"
+    private val LOGGER = LogManager.getLogger();
+
+    private var P4_SERVER: String? = null;
 
     private val p4Server: IOptionsServer;
 
+    var status = "Updater is stopped."
+
     init {
+        if (System.getProperty("p4server") == null) {
+            P4_SERVER = "localhost:1666"
+        } else {
+            P4_SERVER = System.getProperty("p4server")
+        }
+
         p4Server = ServerFactory.getOptionsServer("p4java://${P4_SERVER}", null)
     }
 
@@ -43,12 +52,14 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
 
             st = conn.createStatement()
 
-            var rs = st.executeQuery("SELECT MAX(id) FROM p4_cl")
+            var rs: ResultSet = st.executeQuery("SELECT max(id) FROM p4_cl")
 
-            if (rs != null) {
+            if (rs.next()) {
                 return rs.getInt(1)
             }
 
+        } catch (e : SQLException) {
+            LOGGER.debug(e.message)
         } finally {
             if (conn != null) {
                 conn.close()
@@ -88,10 +99,12 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
 
         val diffCount = lastClIdInP4 - latestClIdInDb
 
+        status = "Updater is going to start."
         if (diffCount > 0) {
             insertNewRecords(diffCount)
             updateClInformation(latestClIdInDb, lastClIdInP4)
         }
+        status = "Updater is stopped"
     }
 
     private fun updateClInformation(latestClId: Int, lastClId: Int) {
@@ -130,12 +143,13 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
                     st.setInt(1, index);
                     st.setInt(2, changelist.getId());
 
+                    status = "Insert changelist ${changelist.id} to database"
+
                     st.addBatch();
                     ++batchSize;
 
                     if (batchSize == 1000) {
                         st.executeBatch();
-                        conn.commit();
                         Thread.sleep(100);
                         batchSize = 0;
                     }
@@ -146,7 +160,6 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
 
             if (batchSize > 0) {
                 st.executeBatch();
-                conn.commit();
                 Thread.sleep(100);
                 batchSize = 0;
             }
@@ -186,7 +199,7 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
                         false, // pending only
                         false); // long desc
 
-            System.out.println(changelists.size);
+            LOGGER.debug("changelist count is ${changelists.size}");
 
             var batchSize: Int = 1;
             for (changelist in changelists) {
@@ -196,11 +209,12 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
                 st.setString(4, changelist.clientId);
                 st.setDate(5, java.sql.Date(changelist.date.time));
 
+                status = "Update pending changelist (${changelist.id}) information to database."
+
                 st.addBatch();
 
                 if (batchSize == 1000) {
                     st.executeBatch();
-                    conn.commit();
                     Thread.sleep(100);
                     batchSize = 0
                 }
@@ -210,7 +224,6 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
 
             if (batchSize > 0) {
                 st.executeBatch();
-                conn.commit();
                 Thread.sleep(100);
             }
 

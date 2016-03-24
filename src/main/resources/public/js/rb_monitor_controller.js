@@ -7,10 +7,10 @@
 
     angular.module('rb_monitors')
         .controller('rb_monitor_controller', [
-            'rbMonitorService', '$http', '$scope', RbMonitorController
+            'rbMonitorService', '$http', '$scope', '$interval', RbMonitorController
         ]);
 
-    function RbMonitorController(rbMonitorService, $http, $scope) {
+    function RbMonitorController(rbMonitorService, $http, $scope, $interval) {
         var self = this;
 
         self.selected = null;
@@ -26,9 +26,49 @@
 
         self.latestClId = -1;
 
+        self.p4_updator_status = "";
+        self.p4_is_updating = false;
+
         function getPerforceData(query) {
             $scope.promise = $http.get("/get_perforce_data").then(function (response) {
-               $scope.cl_datas = response;
+                $scope.cl_datas = response;
+
+                var compareFun = function (a, b) {
+                    var order = query.order;
+
+                    var opposite = true;
+                    if (order.startsWith('-')) {
+                        opposite = false;
+                        order = order.substr(1, order.length - 1);
+                    }
+
+                    var result = 1;
+                    if (order == 'firstName' || order == 'lastName' || order == 'p4Account') {
+                        if (a[order] == null) {
+                            result = -1;
+                        } else if (b[order] == null) {
+                            result = 1;
+                        } else {
+                            result = a[order].localeCompare(b[order]);
+                        }
+                    } else {
+                        if (a[order] > b[order]) {
+                            result = 1;
+                        } else if (a[order] < b[order]) {
+                            result = -1;
+                        } else {
+                            result = 0;
+                        }
+                    }
+
+                    if (opposite) {
+                        result = -1 * result;
+                    }
+
+                    return result;
+                };
+
+                $scope.cl_datas.data.sort(compareFun);
             });
         }
 
@@ -38,7 +78,7 @@
             })
         }
 
-        $scope.onReorder = function (order) {
+        self.onReorder = function (order) {
             getPerforceData(angular.extend({}, self.query, {order: order}));
         };
 
@@ -51,39 +91,77 @@
 
                 refreshLatestClId();
                 getPerforceData(self.query);
+                update_p4_status();
             });
+        
+        var promise_to_update_p4_status;
+
+        self.start_p4_updator_monitor = function() {
+            // stops any running interval to avoid two intervals running at the same time
+            self.stop_p4_updator_monitor();
+
+            // store the interval promise
+            promise_to_update_p4_status = $interval(update_p4_status, 1000 * 30);
+        };
+
+        self.stop_p4_updator_monitor = function() {
+            $interval.cancel(promise_to_update_p4_status);
+        };
 
         function selectItem(item) {
             self.selected = item;
 
-            item.diagrams.forEach(function(entry) {
+            if (item.type == "chart") {
+                item.diagrams.forEach(function (entry) {
 
-                $http.get("/" + entry.remote_service)
-                    .then(function(response) {
-                        var data_x = [];
-                        var data_y = [];
+                    $http.get("/" + entry.remote_service)
+                        .then(function (response) {
+                            var data_x = [];
+                            var data_y = [];
 
-                        angular.forEach(response.data, function(value) {
-                            this.push(value.val0);
-                        }, data_x);
+                            angular.forEach(response.data, function (value) {
+                                this.push(value.val0);
+                            }, data_x);
 
-                        angular.forEach(response.data, function(value) {
-                            this.push(value.val1);
-                        }, data_y);
+                            angular.forEach(response.data, function (value) {
+                                this.push(value.val1);
+                            }, data_y);
 
-                        var data = [{
-                            x: data_x,
-                            y: data_y,
-                            type: 'bar'
-                        }];
+                            var data = [{
+                                x: data_x,
+                                y: data_y,
+                                type: 'bar'
+                            }];
 
-                        Plotly.newPlot('plot_' + entry.remote_service, data);
+                            Plotly.newPlot('plot_' + entry.remote_service, data);
 
-                        $("#spinner_" + entry.remote_service).hide();
-                    });
-            });
+                            $("#spinner_" + entry.remote_service).hide();
+                        });
+                });
+                self.stop_p4_updator_monitor();
+            } else if (item.type == 'utilities') {
+                self.start_p4_updator_monitor();
+            }
         }
 
+
+
+        function update_p4_status() {
+            console.log('updating p4 updator status');
+
+            $http.get("/p4_updator_status").then(function (response) {
+                self.p4_updator_status = response.data;
+                self.p4_is_updating = (self.p4_updator_status.indexOf("stopped") == -1);
+            });
+
+            refreshLatestClId();
+        }
+
+        function startP4UpdateingImmediately() {
+            $http.get("/start_p4_updating").then(function (reponse) {
+               console.log(reponse.data);
+            });
+        }
     }
 
 })();

@@ -65,6 +65,20 @@ public class Main {
             return proxy.getLatestClId();
         });
 
+        Spark.get("/is_p4_data_updating", (req, res) -> {
+            return updateRunnable.isUpdating();
+        });
+
+        Spark.get("/p4_updator_status", (req, res) -> {
+            return updateRunnable.getUpdatorStatu();
+        });
+
+        Spark.get("/start_p4_updating", (req, res) -> {
+            // interrupt it to make it wake up.
+            updateThread.interrupt();
+            return "started";
+        });
+
         updateThread.start();
     }
 
