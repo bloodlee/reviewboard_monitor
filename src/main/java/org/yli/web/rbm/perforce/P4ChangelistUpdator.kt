@@ -108,6 +108,10 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
     }
 
     private fun updateClInformation(latestClId: Int, lastClId: Int) {
+        LOGGER.debug("start to update the changelist information")
+
+        LOGGER.debug("latest changelist id in db is $latestClId, last changelist id in p4 is $lastClId")
+
         val startCl = latestClId + 1
 
         var options = ChangelistOptions();
@@ -129,7 +133,11 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
 
             var index = startCl
             while (index <= lastClId) {
+                LOGGER.debug("update the changelist $index information")
+
                 if (renumberedCls.contains(index)) {
+                    LOGGER.debug("$index is renumbered, skip it.")
+                    ++index
                     continue
                 }
 
@@ -143,7 +151,7 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
                     st.setInt(1, index);
                     st.setInt(2, changelist.getId());
 
-                    status = "Insert changelist ${changelist.id} to database"
+                    status = "Updating changelist ${changelist.id} to database"
 
                     st.addBatch();
                     ++batchSize;
@@ -153,15 +161,17 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
                         Thread.sleep(100);
                         batchSize = 0;
                     }
+
+                    ++index
                 } catch (e: P4JavaException) {
-                    // System.out.println("CL " + index + " doesn't exist! Skip it");
+                    LOGGER.debug("CL " + index + " doesn't exist! Skip it");
+                    ++index
                 }
             }
 
             if (batchSize > 0) {
                 st.executeBatch();
                 Thread.sleep(100);
-                batchSize = 0;
             }
 
         } finally {
@@ -185,7 +195,7 @@ class P4ClUtil(val p4UserName: String, val p4Passwd: String) {
             conn = RbDb.getConnection()
 
             st = conn.prepareStatement("" +
-                    "INSERT INTO p4_cl (id, username, description, client_id, date) " +
+                    "REPLACE INTO p4_cl (id, username, description, client_id, date) " +
                     "VALUES (?, ?, ?, ?, ?)");
 
             var changelists =
