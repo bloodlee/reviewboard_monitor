@@ -8,7 +8,7 @@
     <name>Review Board Monitor</name>
 
     <properties>
-        <kotlin.version>1.0.0</kotlin.version>
+        <kotlin.version>1.0.1</kotlin.version>
     </properties>
 
     <dependencies>

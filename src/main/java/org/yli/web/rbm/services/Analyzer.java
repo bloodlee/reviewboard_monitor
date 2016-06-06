@@ -105,7 +105,7 @@ public class Analyzer implements IAnalyzer {
   public String getRequestsGroupByProductSentInLastMonth() throws SQLException {
     Map<String, Integer> aMap = Maps.newLinkedHashMap();
 
-    final List<String> patterns = Lists.newArrayList("PLT", "SMO", "MOD", "TBX", "LMC", "DOM", "OPC", "PWO");
+    final List<String> patterns = Lists.newArrayList(System.getProperty("PRODUCTS").split(","));
     for (String aPattern : patterns) {
       aMap.put(aPattern, 0);
     }
