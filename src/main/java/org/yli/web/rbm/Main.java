@@ -57,8 +57,12 @@ public class Main {
             return proxy.getTop30ReviewerInLastMonth();
         });
 
-        Spark.get("/get_perforce_data", (req, res) -> {
-            return proxy.getP4Statistic(DateTime.now().minusMonths(1).toDate());
+        Spark.get("/get_perforce_data/:year/:month/:day", (req, res) -> {
+            DateTime now = DateTime.now();
+            DateTime startDate = now.year().setCopy(req.params(":year"))
+                .monthOfYear().setCopy(req.params(":month"))
+                .dayOfMonth().setCopy(req.params(":day"));
+            return proxy.getP4Statistic(startDate.toDate());
         });
 
         Spark.get("/get_max_cl_id", (req, res) -> {
@@ -77,6 +81,30 @@ public class Main {
             // interrupt it to make it wake up.
             updateThread.interrupt();
             return "started";
+        });
+
+        Spark.get("/get_review_request/:p4account/:year/:month/:day", (req, res) -> {
+            DateTime now = DateTime.now();
+            DateTime startDate = now.year().setCopy(req.params(":year"))
+                .monthOfYear().setCopy(req.params(":month"))
+                .dayOfMonth().setCopy(req.params(":day"));
+            return proxy.getReviewRequest(req.params(":p4account"), startDate.toDate());
+        });
+
+        Spark.get("/get_changelist/:p4account/:year/:month/:day", (req, res) -> {
+            DateTime now = DateTime.now();
+            DateTime startDate = now.year().setCopy(req.params(":year"))
+                .monthOfYear().setCopy(req.params(":month"))
+                .dayOfMonth().setCopy(req.params(":day"));
+            return proxy.getChangelist(req.params(":p4account"), startDate.toDate());
+        });
+
+        Spark.get("/get_rb_host", (req, res) -> {
+            return System.getProperty("RB_HOST");
+        });
+
+        Spark.get("/get_p4web_host", (req, res) -> {
+            return System.getProperty("P4WEB_HOST");
         });
 
         updateThread.start();

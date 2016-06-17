@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
 import org.javatuples.Pair;
+import org.joda.time.DateTime;
 import org.yli.web.rbm.db.RbDb;
 
 import java.sql.*;
@@ -339,5 +340,92 @@ public class Analyzer implements IAnalyzer {
 
     return new GsonBuilder().create().toJson(data, new TypeToken<Map<String,
             Object>>() {}.getType());
+  }
+
+  @Override
+  public String getReviewRequest(String p4account, Date startDate) throws SQLException {
+    List<ReviewRequestData> datas = Lists.newArrayList();
+
+    Connection conn = RbDb.getConnection();
+
+    PreparedStatement statement = null;
+    ResultSet rs = null;
+
+    try {
+      statement = conn.prepareStatement(
+          "SELECT a.id, a.summary, a.time_added, b.username from reviews_reviewrequest a, auth_user b " +
+          "WHERE a.submitter_id = b.id and b.username = ? and a.time_added > ? " +
+          "order by a.id desc");
+
+      statement.setString(1, p4account);
+      statement.setDate(2, new java.sql.Date(startDate.getTime()));
+
+      rs = statement.executeQuery();
+
+      while (rs.next()) {
+        int reviewId = rs.getInt(1);
+        String summary = rs.getString(2);
+        Date timeAdded = rs.getDate(3);
+        String p4Account = rs.getString(4);
+        datas.add(new ReviewRequestData(reviewId, summary, p4Account, timeAdded));
+      }
+
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+
+      if (statement != null) {
+        statement.close();
+      }
+
+      if (conn != null) {
+        conn.close();
+      }
+    }
+
+    return new GsonBuilder().create().toJson(datas);
+  }
+
+  @Override
+  public String getChangelist(String p4account, Date startDate) throws SQLException {
+    List<PerforceClData> datas = Lists.newArrayList();
+
+    Connection conn = RbDb.getConnection();
+
+    PreparedStatement statement = null;
+    ResultSet rs = null;
+
+    try {
+      statement = conn.prepareStatement(
+          "SELECT id, username, description from p4_cl where username = ? and date > ?" + " order by id desc");
+
+      statement.setString(1, p4account);
+      statement.setDate(2, new java.sql.Date(startDate.getTime()));
+
+      rs = statement.executeQuery();
+
+      while (rs.next()) {
+        String clId = rs.getString(1);
+        String username = rs.getString(2);
+        String description = rs.getString(3);
+        datas.add(new PerforceClData(clId, username, description));
+      }
+
+    } finally {
+      if (rs != null) {
+        rs.close();
+      }
+
+      if (statement != null) {
+        statement.close();
+      }
+
+      if (conn != null) {
+        conn.close();
+      }
+    }
+
+    return new GsonBuilder().create().toJson(datas);
   }
 }

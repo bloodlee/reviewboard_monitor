@@ -29,8 +29,17 @@
         self.p4_updator_status = "";
         self.p4_is_updating = false;
 
+        self.p4_statistic_start_date = new Date();
+        self.p4_statistic_start_date.setMonth(self.p4_statistic_start_date.getMonth()-1);
+
+        console.log(self.p4_statistic_start_date);
+
         function getPerforceData(query) {
-            $scope.promise = $http.get("/get_perforce_data").then(function (response) {
+            console.log("get the perforce data...");
+
+            $scope.promise = $http.get(
+                "/get_perforce_data/" + self.p4_statistic_start_date.getFullYear() + "/"
+                + (self.p4_statistic_start_date.getMonth() + 1) + "/" + self.p4_statistic_start_date.getDate()).then(function (response) {
                 $scope.cl_datas = response;
 
                 var compareFun = function (a, b) {
@@ -72,6 +81,34 @@
             });
         }
 
+        self.update_p4_data = function () {
+            getPerforceData(self.query);
+        };
+
+        self.get_reviewed_request = function(p4Account) {
+            console.log(p4Account);
+
+            $scope.rr_promise = $http.get(
+                "/get_review_request/" + p4Account + "/" + self.p4_statistic_start_date.getFullYear() + "/"
+                + (self.p4_statistic_start_date.getMonth() + 1) + "/" + self.p4_statistic_start_date.getDate()).then(function (response) {
+                $scope.rr_datas = response;
+            });
+
+            self.selected.type = "reviewrequest_details";
+        };
+
+        self.get_p4_cl_details = function(p4Account) {
+            console.log(p4Account);
+
+            $scope.rr_promise = $http.get(
+                "/get_changelist/" + p4Account + "/" + self.p4_statistic_start_date.getFullYear() + "/"
+                + (self.p4_statistic_start_date.getMonth() + 1) + "/" + self.p4_statistic_start_date.getDate()).then(function (response) {
+                $scope.cl_datas = response;
+            });
+
+            self.selected.type = "p4changelist_details";
+        };
+
         function refreshLatestClId() {
             $http.get("/get_max_cl_id").then(function (response) {
                 self.latestClId = response.data.latest_id;
@@ -92,6 +129,15 @@
                 refreshLatestClId();
                 getPerforceData(self.query);
                 update_p4_status();
+
+                $http.get("/get_rb_host").then(function (response) {
+                    self.rb_host = response.data;
+                });
+
+                $http.get("/get_p4web_host").then(function (response) {
+                    self.p4web_host = response.data;
+                });
+
             });
         
         var promise_to_update_p4_status;

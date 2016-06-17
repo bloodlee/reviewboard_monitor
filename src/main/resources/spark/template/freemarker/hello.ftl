@@ -65,14 +65,16 @@
         <div ng-if="rbm.selected.type == 'perforce'">
             <md-toolbar class="md-table-toolbar md-default">
                 <div class="md-toolbar-tools">
-                    <h2>Reviewed Perforce Changelist (last month)</h2>
+                    <h2>Reviewed Perforce Changelist</h2>
                 </div>
             </md-toolbar>
 
-            <#--<div>-->
-                <#--Data From:-->
-                <#--<md-datepicker ng-model="myDate" md-placeholder="Enter date"></md-datepicker>-->
-            <#--</div>-->
+            <span>
+                Data from:
+                <md-datepicker ng-model="rbm.p4_statistic_start_date"></md-datepicker>
+                <md-button class="md-raised md-primary"
+                           ng-click="rbm.update_p4_data()">Refresh</md-button>
+            </span>
 
             <!-- exact table from live demo -->
             <md-table-container>
@@ -92,14 +94,80 @@
                         <td md-cell>{{cl_data.firstName}}</td>
                         <td md-cell>{{cl_data.lastName}}</td>
                         <td md-cell>{{cl_data.p4Account}}</td>
-                        <td md-cell>{{cl_data.reviewedClCount}}</td>
-                        <td md-cell>{{cl_data.allClCount}}</td>
+                        <td md-cell>
+                            <md-button class="md-primary" ng-click="rbm.get_reviewed_request(cl_data.p4Account)" target="_blank">{{cl_data.reviewedClCount}}</md-button>
+                        </td>
+                        <td md-cell>
+                            <md-button class="md-primary" ng-click="rbm.get_p4_cl_details(cl_data.p4Account)" target="_blank">{{cl_data.allClCount}}</md-button></td>
                         <td md-cell>{{cl_data.ratio | number: 2}}</td>
                     </tr>
                     </tbody>
                 </table>
             </md-table-container>
         </div>
+
+        <div ng-if="rbm.selected.type == 'reviewrequest_details'">
+            <md-toolbar class="md-table-toolbar md-default">
+                <div class="md-toolbar-tools">
+                    <h2>Review Requests</h2>
+                </div>
+            </md-toolbar>
+
+            <!-- exact table from live demo -->
+            <md-table-container>
+                <table md-table md-progress="rr_promise">
+                    <thead md-head>
+                    <tr md-row>
+                        <th md-column>Username</th>
+                        <th md-column>Review ID</th>
+                        <th md-column>Summary</th>
+                        <th md-column>Added Time</th>
+                    </tr>
+                    </thead>
+                    <tbody md-body>
+                    <tr md-row md-select="rr_data" ng-repeat="rr_data in rr_datas.data">
+                        <td md-cell>{{rr_data.username}}</td>
+                        <td md-cell>
+                            <md-button class="md-primary" ng-href="http://{{rbm.rb_host}}/r/{{rr_data.reviewId}}/" target="_blank">{{rr_data.reviewId}}</md-button>
+                        </td>
+                        <td md-cell>{{rr_data.summary}}</td>
+                        <td md-cell>{{cl_data.timeAdded}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </md-table-container>
+        </div>
+
+        <div ng-if="rbm.selected.type == 'p4changelist_details'">
+            <md-toolbar class="md-table-toolbar md-default">
+                <div class="md-toolbar-tools">
+                    <h2>Perforce Changelist</h2>
+                </div>
+            </md-toolbar>
+
+            <!-- exact table from live demo -->
+            <md-table-container>
+                <table md-table md-progress="cl_promise">
+                    <thead md-head>
+                    <tr md-row>
+                        <th md-column>Username</th>
+                        <th md-column>P4 CL</th>
+                        <th md-column>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody md-body>
+                    <tr md-row md-select="cl_data" ng-repeat="cl_data in cl_datas.data">
+                        <td md-cell>{{cl_data.username}}</td>
+                        <td md-cell>
+                            <md-button class="md-primary" ng-href="http://{{rbm.p4web_host}}/changeView.cgi?CH={{cl_data.clId}}/" target="_blank">{{cl_data.clId}}</md-button>
+                        </td>
+                        <td md-cell>{{cl_data.description}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </md-table-container>
+        </div>
+
         <div ng-if="rbm.selected.type == 'utilities'">
             <md-toolbar>
                 <div class="md-toolbar-tools">
